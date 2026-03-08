@@ -1,3 +1,4 @@
+code
 <!doctype html>
 <html lang="en">
   <head>
@@ -9,19 +10,23 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
 
     <style>
-      :root{
-        --accent: #7c7cff;
-        --accent-2:#00ffd5;
-        --bg: #07070a;
-        --card: rgba(255,255,255,0.06);
-        --glass: rgba(255,255,255,0.08);
-        --border: rgba(255,255,255,0.15);
-        --muted: #b6c2d9;
+      :root {
+        --accent: #7c7cff;        /* Purple accent */
+        --accent-2: #00ffd5;      /* Cyan accent */
+        --bg: #07070a;            /* Background */
+        --muted: #b6c2d9;         /* Muted text (fallback) */
+
+        /* fixes / contrast helpers */
+        --border: rgba(255,255,255,0.06);
+        --card-text: rgba(255,255,255,0.92);
+        --card-muted: rgba(255,255,255,0.66);
       }
+
       *{box-sizing:border-box}
       body{
         font-family: 'Inter', system-ui, -apple-system, sans-serif;
         min-height:100vh;
+        margin:0;
         background:
           radial-gradient(800px 400px at 10% -10%, rgba(124,124,255,0.25), transparent 60%),
           radial-gradient(600px 300px at 90% 10%, rgba(0,255,213,0.18), transparent 60%),
@@ -42,16 +47,20 @@
         line-height:1.05;
         letter-spacing:-1px;
       }
-      .lead-custom{color:var(--muted); max-width:720px}
+      .lead-custom{color:var(--card-muted); max-width:720px}
+
+      /* Card styles (improved contrast & overlays behind content) */
       .profile-card,
       .project-card{
-        background: linear-gradient(180deg, rgba(255,255,255,0.12), rgba(255,255,255,0.03));
+        background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
         backdrop-filter: blur(14px);
         -webkit-backdrop-filter: blur(14px);
         border:1px solid var(--border);
         border-radius:18px;
         box-shadow:0 20px 40px rgba(0,0,0,0.35);
         transition: transform .35s ease, box-shadow .35s ease;
+        color: var(--card-text); /* ensure readable children */
+        position: relative; /* needed if pseudo overlay used */
       }
       .profile-card:hover,
       .project-card:hover{
@@ -61,12 +70,31 @@
       .profile-card img{
         box-shadow:0 0 0 6px rgba(124,124,255,0.25), 0 0 40px rgba(124,124,255,0.35);
       }
+
+      /* Ensure any pseudo-element overlays are behind content */
+      .profile-card::before,
+      .project-card::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        z-index: -1;
+        pointer-events: none;
+      }
+
+      /* Make sure mixing/blend/filter do not dim text */
+      .profile-card *, .project-card * {
+        mix-blend-mode: normal !important;
+        filter: none !important;
+      }
+
       .btn-primary{
         background: linear-gradient(90deg, var(--accent), var(--accent-2));
         border:none;
         font-weight:600;
       }
-      .btn-primary:hover{opacity:0.9}
+      .btn-primary:hover{opacity:0.95}
+
+      /* Skill bars: ensure gradient wins even if bootstrap bg-* is present */
       .skill-bar{
         height:12px;
         border-radius:999px;
@@ -76,12 +104,13 @@
       .skill-bar > div{
         height:100%;
         border-radius:999px;
-        background: linear-gradient(90deg, var(--accent), var(--accent-2));
+        background: linear-gradient(90deg, var(--accent), var(--accent-2)) !important;
         animation: loadBar 1.2s ease;
       }
       @keyframes loadBar{
         from{width:0}
       }
+
       section h3{
         font-weight:800;
         margin-bottom:1rem;
@@ -96,16 +125,47 @@
         border-radius:4px;
         background: linear-gradient(90deg, var(--accent), var(--accent-2));
       }
+
+      /* Reveal animation */
       .reveal{opacity:0; transform:translateY(25px) scale(0.98); transition: all 700ms ease}
       .reveal.visible{opacity:1; transform:none}
+
       .fab .btn{
         box-shadow:0 10px 25px rgba(0,0,0,0.45);
       }
 
-      footer{color:var(--muted)}
+      footer{color:var(--card-muted)}
 
       #topBtn{
         box-shadow:0 10px 25px rgba(0,0,0,0.45);
+        display:none;
+        position:fixed;
+        right:18px;
+        bottom:18px;
+        z-index:999;
+      }
+
+      /* Override Bootstrap's text-muted to be readable on dark frosted surfaces */
+      .text-muted {
+        color: var(--card-muted) !important;
+      }
+
+      /* Specific card copy fixes */
+      .project-card .card-title,
+      .project-card .card-text,
+      .profile-card h4,
+      .profile-card p,
+      .profile-card .small,
+      .profile-card .text-muted,
+      .project-card .small {
+        color: var(--card-text) !important;
+      }
+
+      /* Make small / secondary text readable but still muted */
+      .small.text-muted,
+      .profile-card .small,
+      .lead-custom {
+        color: var(--card-muted) !important;
       }
 
       @media (max-width:767px){
@@ -126,7 +186,7 @@
             <li class="nav-item"><a class="nav-link" href="#skills">Skills</a></li>
             <li class="nav-item"><a class="nav-link" href="#projects">Projects</a></li>
             <li class="nav-item"><a class="nav-link" href="#contact">Contact</a></li>
-            <li class="nav-item ms-2"><a class="btn btn-sm btn-outline-light" href="Devesh Sharma Resume.pdf" download>Download Resume</a></li>
+            <li class="nav-item ms-2"><a class="btn btn-sm btn-outline-light" href="Resume.pdf" download>Download Resume</a></li>
           </ul>
         </div>
       </div>
@@ -157,7 +217,8 @@
 
           <div class="col-lg-5">
             <div class="profile-card text-center reveal" id="profileCard">
-              <img src="https://via.placeholder.com/160" alt="avatar" class="rounded-circle mb-3" width="160" height="160">
+              <!-- use a web-safe image so file works for anyone; replace with your local path when deploying -->
+              <img src="C:\Users\deves\Downloads\114251002656.jpg" alt="avatar" class="rounded-circle mb-3" width="160" height="160">
               <h4 class="mb-1">Devesh Sharma</h4>
               <p class="mb-1 text-muted">Student • Developer • Learner</p>
               <div class="d-flex justify-content-center gap-2 mt-2">
@@ -210,30 +271,30 @@
           <div class="col-md-6">
             <div class="mb-3">
               <label class="form-label small text-muted">HTML & CSS</label>
-              <div class="skill-bar"><div class="bg-primary" style="width:85%"></div></div>
+              <div class="skill-bar"><div style="width:85%"></div></div>
             </div>
             <div class="mb-3">
               <label class="form-label small text-muted">JavaScript</label>
-              <div class="skill-bar"><div class="bg-warning" style="width:70%"></div></div>
+              <div class="skill-bar"><div style="width:70%"></div></div>
             </div>
             <div class="mb-3">
               <label class="form-label small text-muted">Bootstrap</label>
-              <div class="skill-bar"><div class="bg-success" style="width:75%"></div></div>
+              <div class="skill-bar"><div style="width:75%"></div></div>
             </div>
           </div>
 
           <div class="col-md-6">
             <div class="mb-3">
               <label class="form-label small text-muted">Python</label>
-              <div class="skill-bar"><div class="bg-info" style="width:65%"></div></div>
+              <div class="skill-bar"><div style="width:65%"></div></div>
             </div>
             <div class="mb-3">
               <label class="form-label small text-muted">C & Problem Solving</label>
-              <div class="skill-bar"><div class="bg-danger" style="width:68%"></div></div>
+              <div class="skill-bar"><div style="width:68%"></div></div>
             </div>
             <div class="mb-3">
               <label class="form-label small text-muted">Git & GitHub</label>
-              <div class="skill-bar"><div class="bg-secondary" style="width:72%"></div></div>
+              <div class="skill-bar"><div style="width:72%"></div></div>
             </div>
           </div>
         </div>
@@ -318,7 +379,7 @@
         <div class="text-end small text-muted">Built with HTML, Bootstrap & JS</div>
       </div>
     </footer>
-    <div class="fab">
+    <div class="fab" style="position:fixed; left:18px; bottom:18px; display:flex; gap:10px; z-index:999;">
       <a href="mailto:deveshsharma1812@gmail.com" class="btn btn-danger btn-lg rounded-circle" title="Email"><i class="bi bi-envelope"></i></a>
       <a href="tel:+918920837702" class="btn btn-primary btn-lg rounded-circle" title="Call"><i class="bi bi-telephone"></i></a>
     </div>
